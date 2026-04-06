@@ -1,43 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Redirecting to Class...</title>
+    <title>JLG Class Redirector</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f0f2f5; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-
 <body>
     <h2 id="status">Checking your schedule...</h2>
+    <div class="loader"></div>
+    <p id="details">Sinusuri ang susunod mong klase (may 10-min advance buffer).</p>
 
     <script>
         const schedule = {
             "Monday": [
-                { start: "08:00", end: "09:00", link: "https://meet.google.com/zrt-qhrr-vmw" },
-                { start: "10:00", end: "11:00", link: "https://meet.google.com/nxq-byfg-mse" },
-                { start: "11:00", end: "12:00", link: "https://meet.google.com/rot-mgqf-vij" },
-                { start: "13:00", end: "16:00", link: "https://meet.google.com/dwy-gxvc-dir" }
+                { start: "08:00", end: "09:00", subject: "Discrete Structures", link: "https://meet.google.com/zrt-qhrr-vmw" },
+                { start: "10:00", end: "11:00", subject: "Living in the IT Era", link: "https://meet.google.com/nxq-byfg-mse" },
+                { start: "11:00", end: "12:00", subject: "Art Appreciation", link: "https://meet.google.com/rot-mgqf-vij" },
+                { start: "13:00", end: "16:00", subject: "NSTP 2", link: "https://meet.google.com/dwy-gxvc-dir" }
             ],
             "Tuesday": [
-                { start: "07:00", end: "08:00", link: "https://meet.google.com/nxq-byfg-mse" },
-                { start: "08:00", end: "09:00", link: "https://meet.google.com/rot-mgqf-vij" },
-                { start: "10:00", end: "13:00", link: "https://meet.google.com/tfr-ybyb-gey" },
-                { start: "15:00", end: "17:00", link: "https://meet.google.com/mrf-dczh-xpp" }
+                { start: "07:00", end: "08:00", subject: "Living in the IT Era", link: "https://meet.google.com/nxq-byfg-mse" },
+                { start: "08:00", end: "09:00", subject: "Art Appreciation", link: "https://meet.google.com/rot-mgqf-vij" },
+                { start: "10:00", end: "13:00", subject: "Computer Programming 2", link: "https://meet.google.com/tfr-ybyb-gey" },
+                { start: "15:00", end: "17:00", subject: "PathFit 2", link: "https://meet.google.com/mrf-dczh-xpp" }
             ],
             "Wednesday": [
-                { start: "08:00", end: "09:00", link: "https://meet.google.com/hco-brsz-zni" },
-                { start: "09:00", end: "10:00", link: "https://meet.google.com/rot-mgqf-vij" },
-                { start: "10:00", end: "11:00", link: "https://meet.google.com/nxq-byfg-mse" },
-                { start: "12:00", end: "13:00", link: "https://meet.google.com/qek-kamr-nsn" },
-                { start: "13:00", end: "15:00", link: "https://meet.google.com/zrt-qhrr-vmw" },
-                { start: "17:00", end: "19:00", link: "https://meet.google.com/bsc-zgoe-zkb?authuser=3" }
+                { start: "08:00", end: "09:00", subject: "The Contemporary World", link: "https://meet.google.com/hco-brsz-zni" },
+                { start: "09:00", end: "10:00", subject: "Art Appreciation", link: "https://meet.google.com/rot-mgqf-vij" },
+                { start: "10:00", end: "11:00", subject: "Living in the IT Era", link: "https://meet.google.com/nxq-byfg-mse" },
+                { start: "12:00", end: "13:00", subject: "STS", link: "https://meet.google.com/qek-kamr-nsn" },
+                { start: "13:00", end: "15:00", subject: "Discrete Structures", link: "https://meet.google.com/zrt-qhrr-vmw" },
+                { start: "17:00", end: "19:00", subject: "Ethics", link: "https://meet.google.com/bsc-zgoe-zkb?authuser=3" }
             ],
             "Friday": [
-                { start: "07:00", end: "09:00", link: "https://meet.google.com/tfr-ybyb-gey" },
-                { start: "10:00", end: "12:00", link: "https://meet.google.com/qek-kamr-nsn" },
-                { start: "13:00", end: "15:00", link: "https://meet.google.com/hco-brsz-zni" }
+                { start: "07:00", end: "09:00", subject: "Computer Programming 2", link: "https://meet.google.com/tfr-ybyb-gey" },
+                { start: "10:00", end: "12:00", subject: "STS", link: "https://meet.google.com/qek-kamr-nsn" },
+                { start: "13:00", end: "15:00", subject: "The Contemporary World", link: "https://meet.google.com/hco-brsz-zni" }
             ],
             "Saturday": [
-                { start: "17:00", end: "19:00", link: "https://meet.google.com/bsc-zgoe-zkb?authuser=3" }
+                { start: "17:00", end: "19:00", subject: "Ethics", link: "https://meet.google.com/bsc-zgoe-zkb?authuser=3" }
             ]
         };
 
@@ -45,31 +50,43 @@
             const now = new Date();
             const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             const currentDay = days[now.getDay()];
+            
+            // Current time in minutes from midnight
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const buffer = 10; // 10 minutes advance
 
             const todaySchedule = schedule[currentDay];
 
             if (todaySchedule) {
-                const currentClass = todaySchedule.find(c => {
+                const targetClass = todaySchedule.find(c => {
                     const [hStart, mStart] = c.start.split(':').map(Number);
                     const [hEnd, mEnd] = c.end.split(':').map(Number);
-                    return currentMinutes >= (hStart * 60 + mStart) && currentMinutes < (hEnd * 60 + mEnd);
+                    
+                    const startInMinutes = hStart * 60 + mStart;
+                    const endInMinutes = hEnd * 60 + mEnd;
+
+                    // REDIRECT LOGIC:
+                    // Papasok kung: (Current Time + 10 mins >= Start Time) AND (Current Time < End Time)
+                    return (currentMinutes + buffer) >= startInMinutes && currentMinutes < endInMinutes;
                 });
 
-                if (currentClass) {
-                    document.getElementById('status').innerText = "Class found! Redirecting...";
-                    window.location.replace(currentClass.link);
+                if (targetClass) {
+                    document.getElementById('status').innerText = `Redirecting to ${targetClass.subject}...`;
+                    // Ginagamit ang replace para hindi na makabalik sa page na ito gamit ang back button
+                    setTimeout(() => {
+                        window.location.replace(targetClass.link);
+                    }, 1500); 
                 } else {
-                    document.getElementById('status').innerText = "No ongoing class at this time.";
+                    document.getElementById('status').innerText = "No upcoming or ongoing class.";
+                    document.querySelector('.loader').style.display = 'none';
                 }
             } else {
-                document.getElementById('status').innerText = "No classes scheduled for today.";
+                document.getElementById('status').innerText = "No classes for today.";
+                document.querySelector('.loader').style.display = 'none';
             }
         }
 
-        // Patakbuhin agad pagka-load
         autoRedirect();
     </script>
 </body>
-
 </html>
