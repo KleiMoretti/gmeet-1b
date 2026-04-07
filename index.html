@@ -46,45 +46,47 @@
             ]
         };
 
-function autoRedirect() {
-    const now = new Date();
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const currentDay = days[now.getDay()];
-    
-    // Kunin ang kasalukuyang oras at minuto
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
-    const totalCurrentMinutes = currentHours * 60 + currentMinutes;
-
-    const todaySchedule = schedule[currentDay];
-
-    if (todaySchedule) {
-        const targetClass = todaySchedule.find(c => {
-            const [hStart, mStart] = c.start.split(':').map(Number);
-            const [hEnd, mEnd] = c.end.split(':').map(Number);
+        function autoRedirect() {
+            const now = new Date();
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const currentDay = days[now.getDay()];
             
-            const startInMinutes = hStart * 60 + mStart;
-            const endInMinutes = hEnd * 60 + mEnd;
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+            const totalCurrentMinutes = currentHours * 60 + currentMinutes;
 
-            // BAGONG LOGIC:
-            // Papasok lang kung ang kasalukuyang oras ay PASOK sa start at end time
-            return totalCurrentMinutes >= startInMinutes && totalCurrentMinutes < endInMinutes;
-        });
+            const todaySchedule = schedule[currentDay];
 
-        if (targetClass) {
-            document.getElementById('status').innerText = `Redirecting to ${targetClass.subject}...`;
-            setTimeout(() => {
-                window.location.replace(targetClass.link);
-            }, 1500); 
-        } else {
-            document.getElementById('status').innerText = "No ongoing class at the moment.";
-            document.querySelector('.loader').style.display = 'none';
+            if (todaySchedule) {
+                const targetClass = todaySchedule.find(c => {
+                    const [hStart, mStart] = c.start.split(':').map(Number);
+                    const [hEnd, mEnd] = c.end.split(':').map(Number);
+                    
+                    // 🔥 ADVANCE NG 10 MINUTES
+                    const startInMinutes = (hStart * 60 + mStart) - 10;
+                    const endInMinutes = hEnd * 60 + mEnd;
+
+                    return totalCurrentMinutes >= startInMinutes && totalCurrentMinutes < endInMinutes;
+                });
+
+                if (targetClass) {
+                    document.getElementById('status').innerText = `Redirecting to ${targetClass.subject}...`;
+                    document.getElementById('details').innerText = "Joining early (10 mins before class)";
+                    
+                    setTimeout(() => {
+                        window.location.replace(targetClass.link);
+                    }, 1500);
+                } else {
+                    document.getElementById('status').innerText = "No ongoing class at the moment.";
+                    document.getElementById('details').innerText = "You can join 10 minutes before your class starts.";
+                    document.querySelector('.loader').style.display = 'none';
+                }
+            } else {
+                document.getElementById('status').innerText = "No classes for today.";
+                document.getElementById('details').innerText = "Enjoy your free day 😎";
+                document.querySelector('.loader').style.display = 'none';
+            }
         }
-    } else {
-        document.getElementById('status').innerText = "No classes for today.";
-        document.querySelector('.loader').style.display = 'none';
-    }
-}
 
         autoRedirect();
     </script>
