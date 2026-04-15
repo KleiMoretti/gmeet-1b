@@ -48,47 +48,52 @@
 
         function autoRedirect() {
             const now = new Date();
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
             const currentDay = days[now.getDay()];
-            
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-            const totalCurrentMinutes = currentHours * 60 + currentMinutes;
 
+            const totalCurrentMinutes = now.getHours() * 60 + now.getMinutes();
             const todaySchedule = schedule[currentDay];
 
-            if (todaySchedule) {
-                const targetClass = todaySchedule.find(c => {
-                    const [hStart, mStart] = c.start.split(':').map(Number);
-                    const [hEnd, mEnd] = c.end.split(':').map(Number);
-                    
-                    // 🔥 ADVANCE NG 10 MINUTES
-                    const startInMinutes = (hStart * 60 + mStart) - 10;
-                    const endInMinutes = hEnd * 60 + mEnd;
-
-                    return totalCurrentMinutes >= startInMinutes && totalCurrentMinutes < endInMinutes;
-                });
-
-                if (targetClass) {
-                    document.getElementById('status').innerText = `Redirecting to ${targetClass.subject}...`;
-                    document.getElementById('details').innerText = "Joining early (10 mins before class)";
-                    
-                    setTimeout(() => {
-                        window.location.replace(targetClass.link);
-                    }, 1500);
-                } else {
-                    document.getElementById('status').innerText = "No ongoing class at the moment.";
-                    document.getElementById('details').innerText = "You can join 10 minutes before your class starts.";
-                    document.querySelector('.loader').style.display = 'none';
-                }
-            } else {
+            if (!todaySchedule) {
                 document.getElementById('status').innerText = "No classes for today.";
                 document.getElementById('details').innerText = "Enjoy your free day 😎";
+                document.querySelector('.loader').style.display = 'none';
+                return;
+            }
+
+            // 🔥 FIX: find ALL valid classes
+            const matches = todaySchedule.filter(c => {
+                const [hStart, mStart] = c.start.split(':').map(Number);
+                const [hEnd, mEnd] = c.end.split(':').map(Number);
+
+                const startInMinutes = (hStart * 60 + mStart) - 10;
+                const endInMinutes = (hEnd * 60 + mEnd);
+
+                return totalCurrentMinutes >= startInMinutes && totalCurrentMinutes < endInMinutes;
+            });
+
+            // 🔥 pick latest match (important fix)
+            const targetClass = matches[matches.length - 1];
+
+            if (targetClass) {
+                document.getElementById('status').innerText = `Redirecting to ${targetClass.subject}...`;
+                document.getElementById('details').innerText = "Joining early (10 mins before class)";
+
+                setTimeout(() => {
+                    window.location.replace(targetClass.link);
+                }, 1500);
+
+            } else {
+                document.getElementById('status').innerText = "No ongoing class at the moment.";
+                document.getElementById('details').innerText = "You can join 10 minutes before your class starts.";
                 document.querySelector('.loader').style.display = 'none';
             }
         }
 
         autoRedirect();
+
+        // 🔥 auto refresh every 30 seconds
+        setInterval(autoRedirect, 30000);
     </script>
 </body>
 </html>
